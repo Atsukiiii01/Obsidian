@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite (optional – keep DB or not)
+database/*.db
+
+# IDE
+.vscode/
+.idea/
