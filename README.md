@@ -27,9 +27,11 @@ This project is designed to feel like a **forensics / SOC / recovery tool**.
 
 ## ---How to Run---
 
-### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/obsidian.git
+
+### 1. Clone Repo..
+
+git clone https://github.com/Atsukiiii01/obsidian.git
 cd obsidian
 
 ### 2. Create virtual environment
