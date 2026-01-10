@@ -1,20 +1,15 @@
 import sys
 from pathlib import Path
-
-# --- FIX IMPORT PATH ---
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
-# ----------------------
-
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
 
 from core.engine import identify_file
 from core.learner import learn_signature
 
-# ----------------------
-# CYBER THEME CONSTANTS
-# ----------------------
+
 BG_MAIN = "#0b0f14"
 BG_PANEL = "#111827"
 FG_TEXT = "#e5e7eb"
@@ -24,6 +19,7 @@ FG_WARN = "#facc15"
 FONT_TITLE = ("Consolas", 14, "bold")
 FONT_BODY = ("Consolas", 10)
 FONT_BUTTON = ("Consolas", 10, "bold")
+
 
 class AdminGUI:
     def __init__(self, root):
@@ -36,10 +32,9 @@ class AdminGUI:
         self.file_path = None
         self.file_bytes = None
 
-        self.build_ui()
+        self.setup_ui()
 
-    def build_ui(self):
-        # ---------- HEADER ----------
+    def setup_ui(self):
         header = tk.Frame(self.root, bg=BG_MAIN)
         header.pack(fill="x", pady=(12, 6))
 
@@ -59,7 +54,6 @@ class AdminGUI:
             font=FONT_BODY
         ).pack(pady=(2, 8))
 
-        # ---------- CONTROL PANEL ----------
         panel = tk.Frame(self.root, bg=BG_PANEL)
         panel.pack(fill="x", padx=12, pady=6)
 
@@ -84,7 +78,6 @@ class AdminGUI:
         )
         self.status.pack(side="right", padx=10)
 
-        # ---------- OUTPUT ----------
         self.output = tk.Text(
             self.root,
             height=10,
@@ -97,7 +90,6 @@ class AdminGUI:
         )
         self.output.pack(fill="x", padx=12, pady=(6, 4))
 
-        # ---------- LEARN PANEL ----------
         learn_panel = tk.Frame(self.root, bg=BG_PANEL)
         learn_panel.pack(fill="x", padx=12, pady=6)
 
@@ -123,7 +115,7 @@ class AdminGUI:
         tk.Button(
             learn_panel,
             text="LEARN SIGNATURE",
-            command=self.learn,
+            command=self.learn_signature_for_file,
             bg=BG_MAIN,
             fg=FG_ACCENT,
             font=FONT_BUTTON,
@@ -132,7 +124,7 @@ class AdminGUI:
             pady=6
         ).pack(side="right", padx=10)
 
-    def log(self, text):
+    def show_output(self, text):
         self.output.delete("1.0", tk.END)
         self.output.insert(tk.END, text)
 
@@ -142,26 +134,29 @@ class AdminGUI:
             return
 
         self.file_path = Path(path).resolve()
-        result, data = identify_file(str(self.file_path), return_bytes=True)
-        self.file_bytes = data
+        analysis, raw_bytes = identify_file(
+            str(self.file_path),
+            return_bytes=True
+        )
+        self.file_bytes = raw_bytes
 
         self.status.config(text="ANALYZED")
 
-        output = (
+        text = (
             f"File: {self.file_path}\n\n"
-            f"Detected Type: {result['type']}\n"
-            f"Entropy: {result['entropy']}\n"
-            f"Confidence: {result['confidence']}\n"
+            f"Detected Type: {analysis['type']}\n"
+            f"Entropy: {analysis['entropy']}\n"
+            f"Confidence: {analysis['confidence']}\n"
         )
 
-        if result.get("hints"):
-            output += "\nIntegrity Hints:\n"
-            for h in result["hints"]:
-                output += f"  ⚠ {h}\n"
+        if analysis.get("hints"):
+            text += "\nIntegrity Hints:\n"
+            for hint in analysis["hints"]:
+                text += f"  ⚠ {hint}\n"
 
-        self.log(output)
+        self.show_output(text)
 
-    def learn(self):
+    def learn_signature_for_file(self):
         if not self.file_path or not self.file_bytes:
             messagebox.showerror("Error", "No file selected")
             return
@@ -191,7 +186,8 @@ class AdminGUI:
                 "Signature already exists"
             )
 
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = AdminGUI(root)
+    AdminGUI(root)
     root.mainloop()

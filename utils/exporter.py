@@ -2,16 +2,18 @@ import csv
 import json
 from pathlib import Path
 
-def export_csv(results: list, output_path: Path):
-    with open(output_path, "w", newline="", encoding="utf-8") as f:
+
+def export_csv(results, output_path: Path):
+    with open(output_path, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(
-            f,
+            file,
             fieldnames=["file", "type", "entropy", "confidence"]
         )
         writer.writeheader()
-        for row in results:
-            writer.writerow(row)
+        for entry in results:
+            writer.writerow(entry)
 
-def export_json(results: list, output_path: Path):
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2)
+
+def export_json(results, output_path: Path):
+    with open(output_path, "w", encoding="utf-8") as file:
+        json.dump(results, file, indent=2)

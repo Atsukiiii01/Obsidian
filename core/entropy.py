@@ -1,16 +1,17 @@
 import math
 from collections import Counter
 
-def shannon_entropy(data: bytes) -> float:
+
+def shannon_entropy(data):
     if not data:
         return 0.0
 
-    counts = Counter(data)
+    freq = Counter(data)
+    total = len(data)
     entropy = 0.0
-    length = len(data)
 
-    for count in counts.values():
-        p = count / length
+    for count in freq.values():
+        p = count / total
         entropy -= p * math.log2(p)
 
     return entropy

@@ -1,21 +1,16 @@
 import sys
 import threading
 from pathlib import Path
-
-# --- FIX IMPORT PATH ---
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
-# ----------------------
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
 
 from core.engine import identify_file
 from utils.exporter import export_csv, export_json
 
-# ----------------------
-# CYBER THEME CONSTANTS
-# ----------------------
+
 BG_MAIN = "#0b0f14"
 BG_PANEL = "#111827"
 FG_TEXT = "#e5e7eb"
@@ -26,6 +21,7 @@ FONT_TITLE = ("Consolas", 14, "bold")
 FONT_BODY = ("Consolas", 10)
 FONT_BUTTON = ("Consolas", 10, "bold")
 
+
 class BatchScanGUI:
     def __init__(self, root):
         self.root = root
@@ -34,10 +30,9 @@ class BatchScanGUI:
         self.root.configure(bg=BG_MAIN)
 
         self.results = []
-        self.build_ui()
+        self.setup_ui()
 
-    def build_ui(self):
-        # ---------- HEADER ----------
+    def setup_ui(self):
         header = tk.Frame(self.root, bg=BG_MAIN)
         header.pack(fill="x", pady=(10, 5))
 
@@ -57,7 +52,6 @@ class BatchScanGUI:
             font=FONT_BODY
         ).pack(pady=(2, 6))
 
-        # ---------- CONTROL PANEL ----------
         panel = tk.Frame(self.root, bg=BG_PANEL)
         panel.pack(fill="x", padx=10, pady=6)
 
@@ -76,7 +70,7 @@ class BatchScanGUI:
         tk.Button(
             panel,
             text="EXPORT CSV",
-            command=self.export_csv,
+            command=self.save_csv,
             bg=BG_MAIN,
             fg=FG_ACCENT,
             font=FONT_BUTTON,
@@ -88,7 +82,7 @@ class BatchScanGUI:
         tk.Button(
             panel,
             text="EXPORT JSON",
-            command=self.export_json,
+            command=self.save_json,
             bg=BG_MAIN,
             fg=FG_ACCENT,
             font=FONT_BUTTON,
@@ -99,14 +93,13 @@ class BatchScanGUI:
 
         self.status = tk.Label(
             panel,
-            text="IDLE",
+            text="STANDBY",
             fg=FG_WARN,
             bg=BG_PANEL,
             font=FONT_BODY
         )
         self.status.pack(side="right", padx=10)
 
-        # ---------- PROGRESS ----------
         style = ttk.Style()
         style.theme_use("default")
         style.configure(
@@ -124,7 +117,6 @@ class BatchScanGUI:
         )
         self.progress.pack(fill="x", padx=12, pady=(6, 4))
 
-        # ---------- OUTPUT ----------
         self.output = tk.Text(
             self.root,
             bg=BG_MAIN,
@@ -136,7 +128,7 @@ class BatchScanGUI:
         )
         self.output.pack(fill="both", expand=True, padx=12, pady=(4, 10))
 
-    def log(self, text):
+    def write_line(self, text):
         self.output.insert(tk.END, text + "\n")
         self.output.see(tk.END)
 
@@ -147,15 +139,14 @@ class BatchScanGUI:
 
         self.output.delete("1.0", tk.END)
         self.results.clear()
-        self.status.config(text="SCANNING...")
+        self.status.config(text="SCANNING")
         self.progress["value"] = 0
 
-        thread = threading.Thread(
+        threading.Thread(
             target=self.scan_folder,
             args=(Path(folder),),
             daemon=True
-        )
-        thread.start()
+        ).start()
 
     def scan_folder(self, folder: Path):
         files = [p for p in folder.rglob("*") if p.is_file()]
@@ -167,39 +158,38 @@ class BatchScanGUI:
 
         self.progress["maximum"] = total
 
-        for idx, file in enumerate(files, start=1):
+        for index, file in enumerate(files, start=1):
             try:
-                result = identify_file(str(file))
-                record = {
+                analysis = identify_file(str(file))
+                entry = {
                     "file": str(file),
-                    "type": result["type"],
-                    "entropy": result["entropy"],
-                    "confidence": result["confidence"]
+                    "type": analysis["type"],
+                    "entropy": analysis["entropy"],
+                    "confidence": analysis["confidence"]
                 }
-                self.results.append(record)
+                self.results.append(entry)
 
-                line = (
-                    f"[{idx}/{total}] "
+                self.write_line(
+                    f"[{index}/{total}] "
                     f"{file.name} | "
-                    f"{record['type']} | "
-                    f"entropy={record['entropy']} | "
-                    f"conf={record['confidence']}"
+                    f"{entry['type']} | "
+                    f"entropy={entry['entropy']} | "
+                    f"conf={entry['confidence']}"
                 )
-                self.log(line)
 
-                if result.get("hints"):
-                    for h in result["hints"]:
-                        self.log(f"   ⚠ {h}")
+                if analysis.get("hints"):
+                    for hint in analysis["hints"]:
+                        self.write_line(f"   ⚠ {hint}")
 
-            except Exception as e:
-                self.log(f"{file} | ERROR: {e}")
+            except Exception as err:
+                self.write_line(f"{file} | ERROR: {err}")
 
-            self.progress["value"] = idx
-            self.status.config(text=f"{idx}/{total}")
+            self.progress["value"] = index
+            self.status.config(text=f"{index}/{total}")
 
         self.status.config(text="COMPLETED")
 
-    def export_csv(self):
+    def save_csv(self):
         if not self.results:
             messagebox.showwarning("No Data", "No scan results to export")
             return
@@ -213,7 +203,7 @@ class BatchScanGUI:
             export_csv(self.results, Path(path))
             messagebox.showinfo("Exported", "CSV export completed")
 
-    def export_json(self):
+    def save_json(self):
         if not self.results:
             messagebox.showwarning("No Data", "No scan results to export")
             return
@@ -227,7 +217,8 @@ class BatchScanGUI:
             export_json(self.results, Path(path))
             messagebox.showinfo("Exported", "JSON export completed")
 
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = BatchScanGUI(root)
+    BatchScanGUI(root)
     root.mainloop()

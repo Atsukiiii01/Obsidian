@@ -1,6 +1,7 @@
 from core.entropy import shannon_entropy
 
-def is_probably_text(data: bytes) -> bool:
+
+def is_probably_text(data):
     if not data:
         return False
 
@@ -8,8 +9,9 @@ def is_probably_text(data: bytes) -> bool:
         return False
 
     printable = sum(
-        1 for b in data
-        if 32 <= b <= 126 or b in b"\n\r\t"
+        1
+        for byte in data
+        if 32 <= byte <= 126 or byte in b"\n\r\t"
     )
 
     ratio = printable / len(data)

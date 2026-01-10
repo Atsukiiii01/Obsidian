@@ -4,14 +4,15 @@ from core.entropy import shannon_entropy
 from core.corruption import corruption_hints
 from utils.file_reader import read_file_bytes
 
-def identify_file(path: str, return_bytes: bool = False):
-    data = read_file_bytes(path)
-    entropy = shannon_entropy(data)
 
-    signature_hits = match_signatures(data)
-    is_text = is_probably_text(data)
+def identify_file(path, return_bytes=False):
+    raw_bytes = read_file_bytes(path)
+    entropy = shannon_entropy(raw_bytes)
 
-    result = {
+    matches = match_signatures(raw_bytes)
+    looks_text = is_probably_text(raw_bytes)
+
+    analysis = {
         "file": path,
         "type": "UNKNOWN",
         "entropy": round(entropy, 3),
@@ -19,32 +20,31 @@ def identify_file(path: str, return_bytes: bool = False):
         "hints": []
     }
 
-    if signature_hits:
-        best = max(signature_hits, key=lambda x: x[1])
-        result["type"] = best[0]
-        result["confidence"] = best[1]
+    if matches:
+        file_type, confidence = max(matches, key=lambda item: item[1])
+        analysis["type"] = file_type
+        analysis["confidence"] = confidence
 
-    elif is_text:
-        result["type"] = "TEXT"
-        result["confidence"] = 0.85
+    elif looks_text:
+        analysis["type"] = "TEXT"
+        analysis["confidence"] = 0.85
 
     elif entropy > 7.5:
-        result["type"] = "BINARY/COMPRESSED"
-        result["confidence"] = 0.6
+        analysis["type"] = "BINARY/COMPRESSED"
+        analysis["confidence"] = 0.6
 
     else:
-        result["type"] = "BINARY"
-        result["confidence"] = 0.5
+        analysis["type"] = "BINARY"
+        analysis["confidence"] = 0.5
 
-    # --- CORRUPTION HINTS ---
-    result["hints"] = corruption_hints(
+    analysis["hints"] = corruption_hints(
         path,
-        result["type"],
-        data,
+        analysis["type"],
+        raw_bytes,
         entropy
     )
 
     if return_bytes:
-        return result, data
+        return analysis, raw_bytes
 
-    return result
+    return analysis

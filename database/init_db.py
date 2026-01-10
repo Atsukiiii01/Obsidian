@@ -1,26 +1,28 @@
 import sqlite3
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "magic.db"
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    cursor = conn.cursor()
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS signatures (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        file_type TEXT NOT NULL,
-        hex_signature TEXT NOT NULL,
-        offset INTEGER NOT NULL,
-        confidence REAL DEFAULT 0.95
-    )
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS signatures (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_type TEXT NOT NULL,
+            hex_signature TEXT NOT NULL,
+            offset INTEGER NOT NULL,
+            confidence REAL DEFAULT 0.95
+        )
     """)
 
-    cur.execute("DELETE FROM signatures")
+    cursor.execute("DELETE FROM signatures")
 
-    signatures = [
+    seed_data = [
         ("PDF", "25504446", 0),
         ("PNG", "89504E470D0A1A0A", 0),
         ("JPG", "FFD8FF", 0),
@@ -34,15 +36,16 @@ def init_db():
         ("EXE", "4D5A", 0),
     ]
 
-    cur.executemany("""
-    INSERT INTO signatures (file_type, hex_signature, offset)
-    VALUES (?, ?, ?)
-    """, signatures)
+    cursor.executemany(
+        "INSERT INTO signatures (file_type, hex_signature, offset) VALUES (?, ?, ?)",
+        seed_data
+    )
 
     conn.commit()
     conn.close()
 
-    print(" SQLite signature database initialized successfully")
+    print("SQLite signature database initialized successfully")
+
 
 if __name__ == "__main__":
     init_db()

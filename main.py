@@ -1,24 +1,27 @@
 from pathlib import Path
 from core.engine import identify_file
 
+
 def main():
-    raw_input_path = input("Enter file path: ").strip()
+    user_input = input("Enter file path: ").strip()
+    file_path = Path(user_input).expanduser().resolve()
 
-    path = Path(raw_input_path).expanduser().resolve()
-
-    if not path.exists():
-        print(f"\n File not found:\n{path}")
+    if not file_path.exists():
+        print("\nFile not found:")
+        print(file_path)
         return
 
-    if not path.is_file():
-        print(f"\n Not a file:\n{path}")
+    if not file_path.is_file():
+        print("\nThe path exists, but it is not a file:")
+        print(file_path)
         return
 
-    result = identify_file(str(path))
+    analysis = identify_file(str(file_path))
 
     print("\n--- File Identification Result ---")
-    for k, v in result.items():
-        print(f"{k}: {v}")
+    for key, value in analysis.items():
+        print(f"{key}: {value}")
+
 
 if __name__ == "__main__":
     main()
