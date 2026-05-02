@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "obsidian"
+version = "0.1.0"
+description = "Automated file analysis and identification tool."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Atsukiiii01"}
+]
+dependencies = [
+    "python-magic-bin; platform_system == 'Windows'"
+]
+
+[project.urls]
+Repository = "https://github.com/Atsukiiii01/Obsidian"
+
+[project.scripts]
+obsidian = "Obsidian.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

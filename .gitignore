@@ -1,19 +1,27 @@
-# Python
+# Python Virtual Environments
+venv/
+env/
+.env
+
+# Compiled Bytecode
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.egg-info/
-venv/
-.env
 
-# OS
+# OS Generated Files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# SQLite (optional – keep DB or not)
-database/*.db
-
-# IDE
+# IDE Files
 .vscode/
 .idea/
+
+# Development Databases
+# Note: We are ignoring any dynamic test DBs, but keeping the setup script.
+# src/Obsidian/database/magic.db

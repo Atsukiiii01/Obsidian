@@ -1,5 +1,5 @@
 from pathlib import Path
-from core.engine import identify_file
+from Obsidian.core.engine import identify_file
 
 
 def main():

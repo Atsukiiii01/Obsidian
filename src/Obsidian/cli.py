@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-from core.engine import identify_file
-from core.learner import learn_signature
+from Obsidian.core.engine import identify_file
+from Obsidian.core.learner import learn_signature
 
 
 def main():
@@ -10,8 +10,8 @@ def main():
 
     if len(args) < 2:
         print("Usage:")
-        print("  python cli.py <file>")
-        print("  python cli.py --learn <file> <correct_type>")
+        print(f"  obsidian <file>")
+        print(f"  obsidian --learn <file> <correct_type>")
         return
 
     if args[1] == "--learn":
