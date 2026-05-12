@@ -8,7 +8,7 @@
 
 Unlike traditional static identifiers that rely solely on file headers, Obsidian uses a bi-directional scanning architecture (Headers & Footers), mathematical entropy calculation, and raw byte-level string extraction to expose a file's true capabilities.
 
-## ⚡ Core Capabilities
+##  Core Capabilities
 
 * **Bi-Directional Signature Matching:** Scans both `[0:8192]` and `[-512:]` offsets to catch heavily packed, appended, or maliciously structured files (e.g., Apple UDIF `koly` blocks).
 * **Cryptographic Identity:** Automatically generates `MD5`, `SHA-1`, and `SHA-256` hashes via memory-safe chunking for immediate IOC threat intelligence lookups.
@@ -16,7 +16,7 @@ Unlike traditional static identifiers that rely solely on file headers, Obsidian
 * **Artifact Extraction:** Strips binaries to extract embedded IPv4 Command and Control (C2) servers, URLs, and Cryptocurrency Wallets using strict `ipaddress` validation to eliminate false positives.
 * **Zero-Dependency:** Operates entirely on the Python Standard Library. No external packages required. 
 
-## 📂 Project Structure
+##  Project Structure
 
 ```text
 gui/        → Cyber GUIs (Launcher, Admin, Batch, Advanced)
